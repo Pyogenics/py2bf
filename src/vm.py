@@ -17,7 +17,7 @@ from builtin import builtins
 This class does processing on the python bytecode
 
 It will generate any additional bytecode (like from library functions) and
-also simulate the execution of the bytecode so it can analyse it.
+also pseudo simulate the execution of the bytecode so it can analyse it.
 '''
 class VirtualMachine:
     def __init__(self, bytecode):
@@ -39,8 +39,22 @@ class VirtualMachine:
                     self.i_load_name(instr)
                 case "LOAD_GLOBAL":
                     self.i_load_global(instr)
+                case "LOAD_CONST":
+                    self.i_load_const(instr)
+                case "CALL_FUNCTION":
+                    self.i_call_function(instr)
+                case "POP_TOP":
+                    self.i_pop_top(instr)
+                case "RETURN_VALUE":
+                    self.i_return_value(instr)
                 case other:
                     print("Unknown instruction")
+
+    def build(self):
+        return self.contexts["global"].program
+
+    def appendProg(self, sub):
+        self.contexts[self.currentCtx].program += sub
 
     '''
     Instructions
@@ -49,10 +63,35 @@ class VirtualMachine:
         pass #self.contexts[self.currentCtx].program += ""
 
     def i_load_name(self, instr):
-        self.stack.append(instr.argval)
+        self.stack.insert(0, instr.argval)
 
     def i_load_global(self, instr):
         self.i_load_name(instr)
+
+    def i_load_const(self, instr):
+        self.stack.insert(0, instr.argval)
+        #XXX: Implement type based copying!!!!! We can only do strings
+        if instr.argval == None:
+            return 0;
+
+        for char in instr.argval:
+            self.appendProg(ord(char) * "+")
+            self.appendProg(">")
+        
+        self.appendProg("<" * len(instr.argval))
+
+    def i_call_function(self, instr):
+        self.appendProg(self.contexts[self.currentCtx].co_names[self.stack[instr.arg]])
+
+    def i_pop_top(self, instr):
+        del self.stack[0]
+
+        #XXX: Delete the item on the brainfuck stack too
+
+    def i_return_value(self, instr):
+        #XXX: Implement this when we do more stuff with functions
+        pass
+
 '''
 Helper class to store the current VM context
 '''

@@ -28,6 +28,7 @@ def main():
     print("Done")
 
     # Process bytecode and convert to brainfuck
+    output = []
     print("Processing bytecode")
     for file in sys.argv[1::]:
         file = f"tmp/{file}c" # Make the file be "./tmp/XXXXXXX.pyc"
@@ -40,13 +41,16 @@ def main():
         bytecode = Bytecode(file)
         VM = VirtualMachine(bytecode)
         VM.run()
-        print(VM.stack)
+        output.append(VM.build())
 
     print("Done")
     
     print("Cleaning up")
     rmtree("./tmp")
     print("All done!")
+
+    for idx,file in enumerate(output):
+        print(f"{sys.argv[idx+1]}:\n{file}")
 
 if __name__ == "__main__":
     main()
