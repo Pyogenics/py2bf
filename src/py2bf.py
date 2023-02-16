@@ -9,8 +9,12 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 '''
 import sys
+from shutil import rmtree
+from marshal import load # I don't want to be importing extra stupid libs
 from py_compile import compile
-from dis import dis
+from dis import Bytecode, dis
+
+from vm import VirtualMachine
 
 def main():
     if len(sys.argv) < 2:
@@ -20,18 +24,29 @@ def main():
     # Compile all the supplied files into bytecode
     print("Compiling bytecode")
     for file in sys.argv[1::]:
-        compile(file, cfile=f"./tmp/{file}c") # XXX: Handle compile errors (doraise=True)
+        bytecode = compile(file, cfile=f"./tmp/{file}c") # XXX: Handle compile errors (doraise=True)
     print("Done")
 
     # Process bytecode and convert to brainfuck
     print("Processing bytecode")
     for file in sys.argv[1::]:
-        file += "c" # Make the file be ".pyc"
-        print(dis(file))
+        file = f"tmp/{file}c" # Make the file be "./tmp/XXXXXXX.pyc"
+        # I hate this so fucking much
+        # Why can't dis just load the stupid file by itself
+        # Why do I need to use extra stupid libraries to do it too
+        with open(file, "rb") as raw:
+            raw.read(16) # Skip past the header?
+            file = load(raw)
+        bytecode = Bytecode(file)
+        VM = VirtualMachine(bytecode)
+        VM.run()
+        print(VM.stack)
+
     print("Done")
-
+    
+    print("Cleaning up")
+    rmtree("./tmp")
     print("All done!")
-
 
 if __name__ == "__main__":
     main()
