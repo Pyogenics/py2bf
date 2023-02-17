@@ -58,16 +58,19 @@ class VirtualMachine:
                     print(f"Unknown instruction '{instr.opname}'")
 
     def buildAll(self):
-        return self.contexts["global"].program
+        return self.build("global")
 
     '''
     Private
     '''
     def build(self, ctx):
-        return self.contexts[ctx].program
+        program = ""
+        for sub in self.contexts[ctx].program:
+            program += sub
+        return program
 
     def appendProg(self, sub):
-        self.contexts[self.currentCtx].program += sub
+        self.contexts[self.currentCtx].program.append(sub)
 
     def pushStack(self, item):
         self.contexts[self.currentCtx].stack.insert(0, item)
@@ -104,10 +107,12 @@ class VirtualMachine:
     def i_load_const(self, instr):
         self.pushStack(instr.argval)
         if type(instr.argval) is str:
+            program = ""
             for char in instr.argval:
-                self.appendProg(">") # The first byte is skipped, a NULL byte to mark the start
-                self.appendProg(ord(char) * "+")
-            self.appendProg(">>") # Leave an extra byte, a NULL byte to mark the end
+                program += ">" # The first byte is skipped, a NULL byte to mark the start
+                program += ord(char) * "+"
+            program += ">>" # Leave an extra byte, a NULL byte to mark the end
+            self.appendProg(program)
 
     def i_call_function(self, instr):
         self.appendProg(self.getStack(instr.arg))
@@ -136,6 +141,7 @@ class VirtualMachine:
     def i_store_name(self, instr):
         name = self.popStack()
         program = self.popStack()
+        self.contexts[self.currentCtx].program.pop(0) # Remove the name from brainfuck stack
         self.contexts[self.currentCtx].co_names[name] = program
 
 '''
@@ -146,4 +152,4 @@ class context:
         self.co_names = {}
         self.stack = []
         self.bytecode = bytecode
-        self.program = "" # Brainfuck program
+        self.program = [] # Brainfuck program
