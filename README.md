@@ -5,6 +5,16 @@ This tool compiles python to bytecode and then transpiles the bytecode into brai
 ```
 ./bf2py.py file1.py file2.py ...
 ```
+## Working example
+This is about the most functionality you can get out of this so far.
+```python
+print("This is an example program")
+
+def myFunction():
+    print("Basic functions work!")
+
+myFunction()
+```
 
 ## Compatibility
 Relative to python 3.11.2
