@@ -20,7 +20,7 @@ Only print is implemented
 |list|no||
 |tuple|no||
 |range|no||
-|str|no||
+|str|yes||
 |bytes|no||
 |bytearray|no||
 |memoryview|no||
