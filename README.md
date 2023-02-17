@@ -7,8 +7,29 @@ This tool compiles python to bytecode and then transpiles the bytecode into brai
 ```
 
 ## Compatibility
+Relative to python 3.11.2
 ### Builtins
 Only print is implemented
+
+### Builtin types
+|Name|Status|Note|
+|----|------|----|
+|int|no||
+|float|no||
+|complex|no||
+|list|no||
+|tuple|no||
+|range|no||
+|str|no||
+|bytes|no||
+|bytearray|no||
+|memoryview|no||
+|set|no||
+|frozenset|no||
+|dict|no||
+|generic|no||
+|alias|no||
+|union|no||
 
 ### Instructions
 |Name|Status|Note|
