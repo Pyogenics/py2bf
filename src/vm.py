@@ -8,7 +8,8 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 '''
 
-from dis import dis
+from types import FunctionType, CodeType
+from dis import Bytecode
 
 # Local
 from builtin import builtins
@@ -21,17 +22,19 @@ also pseudo simulate the execution of the bytecode so it can analyse it.
 '''
 class VirtualMachine:
     def __init__(self, bytecode):
-        self.bytecode = bytecode
-        self.stack = []
         self.contexts = {}
+        self.contextStack = []
         self.currentCtx = "global"
 
         # Create the global context
-        self.contexts["global"] = context()
+        self.contexts["global"] = context(bytecode)
         self.contexts["global"].co_names = builtins;
 
-    def run(self):
-        for instr in self.bytecode:
+    '''
+    Public
+    '''
+    def run(self, ctx="global"):
+        for instr in self.contexts[ctx].bytecode:
             match instr.opname:
                 case "NOP":
                     self.i_nop(instr)
@@ -47,44 +50,70 @@ class VirtualMachine:
                     self.i_pop_top(instr)
                 case "RETURN_VALUE":
                     self.i_return_value(instr)
+                case "MAKE_FUNCTION":
+                    self.i_make_function(instr)
+                case "STORE_NAME":
+                    self.i_store_name(instr)
                 case other:
-                    print("Unknown instruction")
+                    print(f"Unknown instruction '{instr.opname}'")
 
-    def build(self):
+    def buildAll(self):
         return self.contexts["global"].program
+
+    '''
+    Private
+    '''
+    def build(self, ctx):
+        return self.contexts[ctx].program
 
     def appendProg(self, sub):
         self.contexts[self.currentCtx].program += sub
 
+    def pushStack(self, item):
+        self.contexts[self.currentCtx].stack.insert(0, item)
+
+    def popStack(self, pos=0):
+        return self.contexts[self.currentCtx].stack.pop(pos)
+
+    def setStack(self, item, pos=0):
+        self.contexts[self.currentCtx].stack[pos] = item
+
+    def getStack(self, pos=0):
+        return self.contexts[self.currentCtx].stack[pos]
+
+    def newCtx(self, name, bytecode):
+        self.contexts[name] = context(bytecode)
+        self.contextStack.append(self.currentCtx)
+        self.currentCtx = name
+
+    def previousCtx(self):
+        self.currentCtx = self.contextStack.pop()
+
     '''
-    Instructions
+    Instructions (https://docs.python.org/3/library/dis.html#python-bytecode-instructions)
     '''
     def i_nop(self, instr):
         pass #self.contexts[self.currentCtx].program += ""
 
     def i_load_name(self, instr):
-        self.stack.insert(0, instr.argval)
+        self.pushStack(self.contexts[self.currentCtx].co_names[instr.argval])
 
     def i_load_global(self, instr):
-        self.i_load_name(instr)
+        self.pushStack(self.contexts["global"].co_names[instr.argval])
 
     def i_load_const(self, instr):
-        self.stack.insert(0, instr.argval)
-        #XXX: Implement type based copying!!!!! We can only do strings
-        if instr.argval == None:
-            return 0;
-
-        for char in instr.argval:
-            self.appendProg(ord(char) * "+")
-            self.appendProg(">")
-        
-        self.appendProg("<" * len(instr.argval))
+        self.pushStack(instr.argval)
+        if type(instr.argval) is str:
+            for char in instr.argval:
+                self.appendProg(">") # The first byte is skipped, a NULL byte to mark the start
+                self.appendProg(ord(char) * "+")
+            self.appendProg(">>") # Leave an extra byte, a NULL byte to mark the end
 
     def i_call_function(self, instr):
-        self.appendProg(self.contexts[self.currentCtx].co_names[self.stack[instr.arg]])
+        self.appendProg(self.getStack(instr.arg))
 
     def i_pop_top(self, instr):
-        del self.stack[0]
+        self.popStack()
 
         #XXX: Delete the item on the brainfuck stack too
 
@@ -92,11 +121,29 @@ class VirtualMachine:
         #XXX: Implement this when we do more stuff with functions
         pass
 
+    def i_make_function(self, instr):
+        # Convert function to brainfuck and push into co_names
+        name = self.getStack(0)
+        func = Bytecode(self.getStack(1))
+
+        self.newCtx(name, func)
+        self.run(name) # Recursion, whooo!
+        program = self.build(name)
+
+        self.previousCtx()
+        self.setStack(program, 1)
+
+    def i_store_name(self, instr):
+        name = self.popStack()
+        program = self.popStack()
+        self.contexts[self.currentCtx].co_names[name] = program
+
 '''
 Helper class to store the current VM context
 '''
 class context:
-    def __init__(self):
+    def __init__(self, bytecode):
         self.co_names = {}
-        self.co_consts = {}
+        self.stack = []
+        self.bytecode = bytecode
         self.program = "" # Brainfuck program

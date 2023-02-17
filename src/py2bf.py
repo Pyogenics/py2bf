@@ -33,7 +33,7 @@ def main():
     for file in sys.argv[1::]:
         file = f"tmp/{file}c" # Make the file be "./tmp/XXXXXXX.pyc"
         # I hate this so fucking much
-        # Why can't dis just load the stupid file by itself
+        # Why can't `dis` just load the stupid file by itself
         # Why do I need to use extra stupid libraries to do it too
         with open(file, "rb") as raw:
             raw.read(16) # Skip past the header?
@@ -41,7 +41,7 @@ def main():
         bytecode = Bytecode(file)
         VM = VirtualMachine(bytecode)
         VM.run()
-        output.append(VM.build())
+        output.append(VM.buildAll())
 
     print("Done")
     
