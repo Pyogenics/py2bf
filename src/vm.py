@@ -21,11 +21,11 @@ It will generate any additional bytecode (like from library functions) and
 also pseudo simulate the execution of the bytecode so it can analyse it.
 '''
 class VirtualMachine:
-    def __init__(self, bytecode):
-        self.contexts = {}
-        self.contextStack = []
-        self.currentCtx = "global"
+    contexts = {}
+    contextStack = []
+    currentCtx = "global"
 
+    def __init__(self, bytecode):
         # Create the global context
         self.contexts["global"] = context(bytecode)
         self.contexts["global"].co_names = builtins
@@ -129,7 +129,7 @@ class VirtualMachine:
     def i_make_function(self, instr):
         # Convert function to brainfuck and push into co_names
         name = self.getStack(0)
-        func = Bytecode(self.getStack(1))
+        func = self.getStack(1)
 
         self.newCtx(name, func)
         self.run(name) # Recursion, whooo!
@@ -149,7 +149,7 @@ Helper class to store the current VM context
 '''
 class context:
     def __init__(self, bytecode):
+        self.bytecode = Bytecode(bytecode)
         self.co_names = {}
         self.stack = []
-        self.bytecode = bytecode
-        self.program = [] # Brainfuck program
+        self.program = []

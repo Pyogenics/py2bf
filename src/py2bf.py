@@ -9,12 +9,26 @@ The above copyright notice and this permission notice shall be included in all c
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 '''
 import sys
-from shutil import rmtree
-from marshal import load # I don't want to be importing extra stupid libs
+from marshal import load
 from py_compile import compile
-from dis import Bytecode, dis
 
 from vm import VirtualMachine
+
+def compileBytecode(files):
+    bytecodePaths = []
+    for file in files:
+        bytecodePaths.append(compile(file, cfile=f"bytecode/{file}"))
+    return bytecodePaths
+
+def transpileBytecode(filePaths):
+    bfPrograms = []
+    for file in filePaths:
+        with open(file, "rb") as pyc:
+            pyc.read(16) # Skip header (python < 3.7 uses a 12 byte header)
+            VM = VirtualMachine(load(pyc))
+            VM.run()
+            bfPrograms.append(VM.buildAll())
+    return bfPrograms
 
 def main():
     if len(sys.argv) < 2:
@@ -22,35 +36,17 @@ def main():
         sys.exit(64); # EX_USAGE
 
     # Compile all the supplied files into bytecode
-    print("Compiling bytecode")
-    for file in sys.argv[1::]:
-        bytecode = compile(file, cfile=f"./tmp/{file}c") # XXX: Handle compile errors (doraise=True)
-    print("Done")
-
-    # Process bytecode and convert to brainfuck
-    output = []
-    print("Processing bytecode")
-    for file in sys.argv[1::]:
-        file = f"tmp/{file}c" # Make the file be "./tmp/XXXXXXX.pyc"
-        # I hate this so fucking much
-        # Why can't `dis` just load the stupid file by itself
-        # Why do I need to use extra stupid libraries to do it too
-        with open(file, "rb") as raw:
-            raw.read(16) # Skip past the header?
-            file = load(raw)
-        bytecode = Bytecode(file)
-        VM = VirtualMachine(bytecode)
-        VM.run()
-        output.append(VM.buildAll())
-
+    print("Compiling bytecode.....", end=" ")
+    bytecodePaths = compileBytecode(sys.argv[1::])
     print("Done")
     
-    print("Cleaning up")
-    rmtree("./tmp")
-    print("All done!")
+    # Process bytecode and convert to brainfuck
+    print("Processing bytecode.....", end=" ")
+    bfPrograms = transpileBytecode(bytecodePaths)
+    print("Done")
 
-    for idx,file in enumerate(output):
-        print(f"{sys.argv[idx+1]}:\n{file}")
+    for name, file in zip(sys.argv[1::], bfPrograms):
+        print(f"{name}:\n{file}")
 
 if __name__ == "__main__":
     main()
