@@ -28,7 +28,7 @@ class VirtualMachine:
 
         # Create the global context
         self.contexts["global"] = context(bytecode)
-        self.contexts["global"].co_names = builtins;
+        self.contexts["global"].co_names = builtins
 
     '''
     Public
@@ -141,7 +141,7 @@ class VirtualMachine:
     def i_store_name(self, instr):
         name = self.popStack()
         program = self.popStack()
-        self.contexts[self.currentCtx].program.pop(0) # Remove the name from brainfuck stack
+        self.contexts[self.currentCtx].program.pop(-1) # Remove the name from brainfuck stack
         self.contexts[self.currentCtx].co_names[name] = program
 
 '''
