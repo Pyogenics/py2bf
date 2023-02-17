@@ -76,7 +76,7 @@ Only print is implemented
 |MATCH_MAPPING|no||
 |MATCH_SEQUENCE|no||
 |MATCH_KEYS|no||
-|STORE_NAME|no||
+|STORE_NAME|yes||
 |DELETE_NAME|no||
 |UNPACK_SEQUENCE|no||
 |UNPACK_EX|no||
