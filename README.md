@@ -2,6 +2,7 @@
 This tool compiles python to bytecode and then transpiles the bytecode into brainfuck.
 
 ## Usage
+Tested on python 3.10
 ```
 ./bf2py.py file1.py file2.py ...
 ```
@@ -17,7 +18,8 @@ myFunction()
 ```
 
 ## Compatibility
-Relative to python 3.11.2
+py2bf only supports python 3.7 and newer, for now.
+Information relative to python 3.11.2:
 ### Builtins
 Only print is implemented
 
@@ -91,3 +93,67 @@ Only print is implemented
 |UNPACK_SEQUENCE|no||
 |UNPACK_EX|no||
 |STORE_ATTR|no||
+|DELETE_ATTR|no||
+|STORE_GLOBAL|no||
+|DELETE_GLOBAL|no||
+|LOAD_CONST|yes||
+|LOAD_NAME|yes||
+|BUILD_TUPLE|no||
+|BUILD_LIST|no||
+|BUILD_SET|no||
+|BUILD_MAP|no||
+|BUILD_CONST_KEY_MAP|no||
+|BUILD_STRING|no||
+|LIST_TO_TUPLE|no||
+|LIST_EXTEND|no||
+|SET_UPDATE|no||
+|DICT_UPDATE|no||
+|DICT_MERGE|no||
+|LOAD_ATTR|no||
+|COMPARE_OP|no||
+|IS_OP|no||
+|CONTAINS_OP|no||
+|IMPORT_NAME|no||
+|IMPORT_FROM|no||
+|JUMP_FORWARD|no||
+|JUMP_BACKWARD|no||
+|JUMP_BACKWARD_NO_INTERRUPT|no||
+|POP_JUMP_FORWARD_IF_TRUE|no||
+|POP_JUMP_BACKWARD_IF_TRUE|no||
+|POP_JUMP_FORWARD_IF_FALSE|no||
+|POP_JUMP_BACKWARD_IF_FALSE|no||
+|POP_JUMP_FORWARD_IF_NOT_NONE|no||
+|POP_JUMP_BACKWARD_IF_NOT_NONE|no||
+|POP_JUMP_FORWARD_IF_NONE|no||
+|POP_JUMP_BACKWARD_IF_NONE|no||
+|JUMP_IF_TRUE_OR_POP|no||
+|JUMP_IF_FALSE_OR_POP|no||
+|FOR_ITER|no||
+|LOAD_GLOBAL|yes||
+|LOAD_FAST|no||
+|STORE_FAST|no||
+|DELETE_FAST|no||
+|MAKE_CELL|no||
+|LOAD_CLOSURE|no||
+|LOAD_DEREF|no||
+|LOAD_CLASS_DEREF|no||
+|STORE_DEREF|no||
+|DELETE_DEREF|no||
+|COPY_FREE_VARS|no||
+|RAISE_VARARGS|no||
+|CALL|no||
+|CALL_FUNCTION_EX|no|CALL_FUNCTION is implemented|
+|LOAD_METHOD|no||
+|PRECALL|no||
+|PUSH_NULL|no||
+|KW_NAMES|no||
+|MAKE_FUNCTION|yes|Flags not implemented|
+|BUILD_SLICE|no||
+|EXTENDED_ARG|no||
+|FORMAT_VALUE|no||
+|MATCH_CLASS|no||
+|RESUME|no||
+|RETURN_GENERATOR|no||
+|SEND|no||
+|ASYNC_GEN_WRAP|no||
+|HAVE_ARGUMENT|no||
