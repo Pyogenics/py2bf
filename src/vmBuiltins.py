@@ -13,5 +13,8 @@ Built-in functions (https://docs.python.org/3/library/functions.html) cannot be 
 They are directly implemented for brainfuck here
 '''
 bfBuiltins = {
-    "print": "<<[<]>[.>]", # Go to the starting null byte and then to the first byte then output chars until we reach a null byte
+    "print": "<<[<] >[.>] ++++++++++. [-]", # Go to the starting null byte.
+                                            # Go forward and print each cell until we reach the next null byte.
+                                            # Print a newline character ('\n' is 10 in ASCII).
+                                            # Clear the cell (because of the previous operation).
 }
