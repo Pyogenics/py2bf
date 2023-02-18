@@ -11,10 +11,13 @@ This is about the most functionality you can get out of this so far.
 ```python
 print("This is an example program")
 
-def myFunction():
+def printFeatures():
     print("Basic functions work!")
 
-myFunction()
+printFeatures()
+
+variables = "And so do variables, just not inside functions........"
+print(variables)
 ```
 
 ## Compatibility

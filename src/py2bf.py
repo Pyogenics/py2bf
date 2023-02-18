@@ -26,8 +26,8 @@ def transpileBytecode(filePaths):
         with open(file, "rb") as pyc:
             pyc.read(16) # Skip header (python < 3.7 uses a 12 byte header)
             VM = VirtualMachine(load(pyc))
-            VM.run()
-            bfPrograms.append(VM.buildAll())
+            VM.runContext()
+            bfPrograms.append(VM.buildProgram())
     return bfPrograms
 
 def main():
