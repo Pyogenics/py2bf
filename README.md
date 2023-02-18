@@ -4,7 +4,7 @@ This tool compiles python to bytecode and then transpiles the bytecode into brai
 ## Usage
 Tested on python 3.10
 ```
-./bf2py.py file1.py file2.py ...
+./py2bf.py file1.py file2.py ...
 ```
 ## Working example
 This is about the most functionality you can get out of this so far.
