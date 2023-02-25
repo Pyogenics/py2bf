@@ -16,7 +16,12 @@ def printFeatures():
 
 printFeatures()
 
-variables = "And so do variables, just not inside functions........"
+def featuresWithArgs(feature):
+	print(feature)
+
+featuresWithArgs("Arguments to functions work")
+
+variables = "And so do variables outside functions"
 print(variables)
 ```
 
@@ -133,7 +138,7 @@ Only print is implemented
 |JUMP_IF_FALSE_OR_POP|no||
 |FOR_ITER|no||
 |LOAD_GLOBAL|yes||
-|LOAD_FAST|no||
+|LOAD_FAST|yes||
 |STORE_FAST|no||
 |DELETE_FAST|no||
 |MAKE_CELL|no||

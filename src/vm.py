@@ -44,6 +44,8 @@ class VirtualMachine:
                     self.i_LOAD_NAME(instr)
                 case "LOAD_GLOBAL":
                     self.i_LOAD_GLOBAL(instr)
+                case "LOAD_FAST":
+                    self.i_LOAD_FAST(instr)
                 case "RETURN_VALUE":
                     self.i_RETURN_VALUE(instr)
                 case "CALL_FUNCTION":
@@ -55,6 +57,19 @@ class VirtualMachine:
 
     def buildProgram(self):
         return self.contexts["global"].buildProgram()
+
+    def injectArgs(self, function, args):
+        chunks = function.split("#")
+
+        for chunkIdx, chunk in enumerate(chunks):
+            if chunk[:3] == "arg":
+                argNum = int(chunk[3:])
+                chunks[chunkIdx] = self.encodeStr(args[argNum])
+
+        newFunc = ""
+        for sub in chunks:
+            newFunc += sub
+        return newFunc
 
     def useNewContext(self, name, bytecode):
         self.contexts[name] = Context(bytecode)
@@ -114,15 +129,27 @@ class VirtualMachine:
         obj = self.contexts["global"].co_objects[instr.argval]
         self.contexts[self.currentContext].push(obj)
 
+    def i_LOAD_FAST(self, instr):
+        obj = f"#arg{instr.arg}#" # The actual values are injected by CALL_FUNCTION
+        self.contexts[self.currentContext].appendSubProgram(obj)
+        self.contexts[self.currentContext].push(obj)
+
     # How would this work?
     def i_RETURN_VALUE(self, instr):
         self.i_NOP(instr)
 
+    # XXX: Maybe arguments should be baked into the function at transpile time?
+    # The bytecode to BF transpile would need to happen here instead and MAKE_FUNCTION just pop the name?
+    # Perhaps leave MAKE_FUNCTION alone and inject the variables here? E.g. make a copy here and build that with the
+    # injected variables (args).
     def i_CALL_FUNCTION(self, instr):
         args = []
         for idx in range(instr.arg):
             args.append(self.contexts[self.currentContext].pop())
+        args.reverse()
         func = self.contexts[self.currentContext].pop()
+
+        func = self.injectArgs(func, args)
         self.contexts[self.currentContext].appendSubProgram(func)
         self.contexts[self.currentContext].push(None) # Use None as a place holder for the return value on the simulated stack, we can't really simulate return values?
 
