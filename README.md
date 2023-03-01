@@ -29,7 +29,7 @@ print(variables)
 py2bf only supports python 3.7 and newer, for now.
 Information relative to python 3.11.2:
 ### Builtins
-Only print is implemented
+Only print and input are implemented (Improperly!)
 
 ### Builtin types
 |Name|Status|Note|
